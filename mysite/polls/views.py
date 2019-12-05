@@ -3,6 +3,10 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from .serializers import QuestionSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import viewsets
 
 from .models import Choice, Question
 
@@ -54,3 +58,26 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+@api_view(['POST', 'GET'])
+def apitest(request):
+    if request.method == 'GET':
+        q = Question.objects.all()
+        c = Choice.objects.all()
+        qserializer = QuestionSerializer(q, many=True)
+        return Response(qserializer.data)
+
+    if request.method == 'POST':
+        postdata = QuestionSerializer(data=request.data)
+        if postdata.is_valid():
+            postdata.save()
+            return Response(postdata.data)
+
+
+@api_view(['DELETE'])
+def deleteapi(request, question_id):
+    if request.method == 'DELETE':
+        data = Question.objects.get(id=question_id)
+        data.delete()
+        return HttpResponse('Deletion was successfull')
