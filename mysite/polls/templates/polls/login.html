@@ -1,5 +1,6 @@
 {% load static %}
 {% load socialaccount %}
+{% providers_media_js %}
 
 {% if user.is_authenticated %}
 <p>Welcome {{user.username}}.</p>
@@ -20,4 +21,5 @@ You are not logged in.
 <form action='{% provider_login_url "google" %}'>
   <input type="image" src="static/polls/images/1.png" height="80" width="180">
 </form>
+<a href="{% provider_login_url "facebook" method="js_sdk" %}">Login with Facebook</a>
 {% endif %}

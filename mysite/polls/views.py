@@ -3,25 +3,32 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
-from .serializers import QuestionSerializer
+from .serializers import QuestionSerializer, UserSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets
+from django.contrib.sessions.models import Session
+
 
 from .models import Choice, Question
+from django.contrib.auth.models import User
 
-class LoginView(generic.ListView):
-    template_name = 'polls/login.html'
-    context_object_name = 'latest_question_list'
-
-    def get_queryset(self):
-        """
-        Return the last five published questions (not including those set to be
-        published in the future).
-        """
-        return Question.objects.filter(
+def loginview(request):
+    if "username" in request.session:
+        latest_question_list = Question.objects.filter(
             pub_date__lte=timezone.now()
         ).order_by('-pub_date')[:5]
+        return render(request, 'polls/login.html', {'latest_question_list': latest_question_list})
+    else:
+        request.session['username'] = "username"
+        return render(request, 'polls/login.html')
+
+def logoutview(request):
+    if request.user.is_authenticated:
+        request.session.flush('userlogin')
+        deauth(request)
+        return render(request, 'polls/login.html')
+
 
 
 class IndexView(generic.ListView):
@@ -94,3 +101,9 @@ def deleteapi(request, question_id):
         data = Question.objects.get(id=question_id)
         data.delete()
         return HttpResponse('Deletion was successfull')
+
+@api_view(['POST', 'GET'])
+def userapi(request, x):
+    q = User.objects.filter(username=x)
+    qserializer = UserSerializer(q, many=True)
+    return Response(qserializer.data)
