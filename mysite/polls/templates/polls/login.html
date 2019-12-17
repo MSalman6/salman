@@ -1,25 +1,20 @@
-{% load static %}
-{% load socialaccount %}
-{% providers_media_js %}
-
-{% if user.is_authenticated %}
-<p>Welcome {{user.username}}.</p>
-<h3>-Latest Polls-</h3>
-<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
-{% if latest_question_list %}
-    <ul>
-    {% for question in latest_question_list %}
-        <li><a href="{% url 'polls:detail' question.id %}">{{ question.question_text }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}
-<p><button><a href='accounts/logout/'>Logout?</a></button>
-{% else %}
-You are not logged in.
-<form action='{% provider_login_url "google" %}'>
-  <input type="image" src="static/polls/images/1.png" height="80" width="180">
-</form>
-<a href="{% provider_login_url "facebook" method="js_sdk" %}">Login with Facebook</a>
-{% endif %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Sign Up</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Sign Up</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Already Have An Account? <a class="ml-2" href="//127.0.0.1:8000/accounts/login/">Sign In</a>
+            </small>
+        </div>
+    </div>
+{% endblock content %}

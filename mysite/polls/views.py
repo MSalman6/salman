@@ -8,20 +8,30 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets
 from django.contrib.sessions.models import Session
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 
 
 from .models import Choice, Question
 from django.contrib.auth.models import User
 
-def loginview(request):
-    if "username" in request.session:
-        latest_question_list = Question.objects.filter(
-            pub_date__lte=timezone.now()
-        ).order_by('-pub_date')[:5]
-        return render(request, 'polls/login.html', {'latest_question_list': latest_question_list})
+def indexview(request):
+    # if "username" in request.session:
+    #     latest_question_list = Question.objects.filter(
+    #         pub_date__lte=timezone.now()
+    #     ).order_by('-pub_date')[:5]
+    #     return render(request, 'polls/login.html', {'latest_question_list': latest_question_list})
+    # else:
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username}')
+            return render(request, 'polls/index.html')
     else:
-        request.session['username'] = "username"
-        return render(request, 'polls/login.html')
+        form = UserCreationForm()
+        return render(request, 'polls/login.html', {'form':form})
 
 def logoutview(request):
     if request.user.is_authenticated:
@@ -31,7 +41,7 @@ def logoutview(request):
 
 
 
-class IndexView(generic.ListView):
+class PollsIndexView(generic.ListView):
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
 
