@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
@@ -24,7 +24,7 @@ def indexview(request):
             password = form.cleaned_data['password1']
             user = authenticate(username=username, password=password)
             login(request, user)
-            return render(request, 'polls/index.html')
+            return redirect('login')
     else:
         form = UserCreationForm()
         return render(request, 'polls/register.html', {'form':form})
