@@ -10,28 +10,24 @@ from rest_framework import viewsets
 from django.contrib.sessions.models import Session
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-
+from django.contrib.auth import authenticate, login
 
 from .models import Choice, Question
 from django.contrib.auth.models import User
 
 def indexview(request):
-    # if "username" in request.session:
-    #     latest_question_list = Question.objects.filter(
-    #         pub_date__lte=timezone.now()
-    #     ).order_by('-pub_date')[:5]
-    #     return render(request, 'polls/login.html', {'latest_question_list': latest_question_list})
-    # else:
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}')
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user = authenticate(username=username, password=password)
+            login(request, user)
             return render(request, 'polls/index.html')
     else:
         form = UserCreationForm()
-        return render(request, 'polls/login.html', {'form':form})
+        return render(request, 'polls/register.html', {'form':form})
 
 def logoutview(request):
     if request.user.is_authenticated:
